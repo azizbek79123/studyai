@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
@@ -767,8 +767,10 @@ Foiz yozma. Faqat aniq, foydali tavsiyalar ber. 300 so'z.`;
 
   try {
     const text = await callAI(prompt);
-    document.getElementById('feasibilityBadge').innerHTML = '';
-    document.getElementById('progressDisplay').innerHTML = '';
+    const fb = document.getElementById('feasibilityBadge');
+    const pd = document.getElementById('progressDisplay');
+    if (fb) fb.innerHTML = '';
+    if (pd) pd.innerHTML = '';
     document.getElementById('aiText').textContent = text;
     document.getElementById('aiResult').classList.add('visible');
 
