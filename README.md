@@ -1,0 +1,2 @@
+# studyai
+O'quv planer
