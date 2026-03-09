@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyAI v2 — O'quv Planer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08090f;
+  --surface: #111118;
+  --surface2: #18181f;
+  --surface3: #1f1f28;
+  --border: #26263a;
+  --accent: #7c6af7;
+  --accent2: #f7c56a;
+  --accent3: #6af7c5;
+  --text: #eaeaf5;
+  --muted: #7a7a99;
+  --danger: #f76a6a;
+  --done: #6af7c5;
+  --half: #f7c56a;
+  --undone: #f76a6a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 55% 45% at 8% 15%, rgba(124,106,247,0.13) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 40% at 92% 85%, rgba(106,247,197,0.07) 0%, transparent 70%);
+}
+.app { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+/* SIDEBAR */
+.sidebar {
+  width:230px; background:var(--surface); border-right:1px solid var(--border);
+  padding:24px 14px; display:flex; flex-direction:column; gap:4px;
+  position:fixed; top:0; left:0; bottom:0; overflow-y:auto;
+}
+.logo { font-family:'Syne',sans-serif; font-size:21px; font-weight:800; color:var(--accent); padding:0 8px 18px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+.logo span { color:var(--accent2); }
+.logo small { display:block; font-size:10px; font-weight:400; color:var(--muted); margin-top:2px; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:9px; cursor:pointer; font-size:13.5px; color:var(--muted); transition:all 0.18s; border:1px solid transparent; }
+.nav-item:hover { background:var(--surface2); color:var(--text); }
+.nav-item.active { background:rgba(124,106,247,0.14); color:var(--accent); border-color:rgba(124,106,247,0.28); }
+.nav-icon { font-size:16px; width:20px; text-align:center; }
+.nav-badge { margin-left:auto; background:var(--accent); color:white; font-size:10px; padding:1px 6px; border-radius:99px; }
+
+/* MAIN */
+.main { margin-left:230px; flex:1; padding:32px 36px; max-width:calc(100vw - 230px); }
+.page-header { font-family:'Syne',sans-serif; font-size:26px; font-weight:700; margin-bottom:4px; letter-spacing:-0.4px; }
+.page-sub { color:var(--muted); font-size:13px; margin-bottom:24px; }
+
+/* CARDS */
+.card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:18px; }
+.card-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:7px; }
+
+/* FORM */
+input, textarea, select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:11px 13px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13.5px; outline:none; transition:border-color 0.2s; resize:vertical; }
+input:focus, textarea:focus, select:focus { border-color:var(--accent); }
+input::placeholder, textarea::placeholder { color:var(--muted); }
+.form-group { margin-bottom:12px; }
+.form-label { font-size:11px; color:var(--muted); margin-bottom:5px; display:block; text-transform:uppercase; letter-spacing:0.5px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+/* BUTTONS */
+.btn { padding:10px 20px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:500; transition:all 0.18s; }
+.btn-primary { background:var(--accent); color:white; }
+.btn-primary:hover { background:#6a58e0; transform:translateY(-1px); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.btn-secondary { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+.btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+.btn-gold { background:var(--accent2); color:#1a1400; font-weight:600; }
+.btn-gold:hover { background:#e0b050; transform:translateY(-1px); }
+.btn-danger { background:rgba(247,106,106,0.15); color:var(--danger); border:1px solid rgba(247,106,106,0.25); }
+.btn-danger:hover { background:rgba(247,106,106,0.25); }
+.btn-sm { padding:5px 12px; font-size:12px; }
+
+/* STATUS BUTTONS */
+.status-btns { display:flex; gap:6px; margin-top:8px; }
+.status-btn { padding:4px 10px; border-radius:7px; border:none; cursor:pointer; font-size:11px; font-weight:600; transition:all 0.15s; opacity:0.6; }
+.status-btn.done { background:rgba(106,247,197,0.15); color:var(--done); border:1px solid rgba(106,247,197,0.3); }
+.status-btn.done.active, .status-btn.done:hover { opacity:1; background:rgba(106,247,197,0.25); }
+.status-btn.half { background:rgba(247,197,106,0.15); color:var(--half); border:1px solid rgba(247,197,106,0.3); }
+.status-btn.half.active, .status-btn.half:hover { opacity:1; background:rgba(247,197,106,0.25); }
+.status-btn.undone { background:rgba(247,106,106,0.15); color:var(--undone); border:1px solid rgba(247,106,106,0.3); }
+.status-btn.undone.active, .status-btn.undone:hover { opacity:1; background:rgba(247,106,106,0.25); }
+
+/* STATUS INDICATOR */
+.status-dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+.status-dot.done { background:var(--done); }
+.status-dot.half { background:var(--half); }
+.status-dot.undone { background:var(--undone); }
+.status-dot.pending { background:var(--muted); }
+
+/* TASK ITEM */
+.task-item {
+  background:var(--surface2); border:1px solid var(--border); border-radius:11px;
+  padding:14px 16px; margin-bottom:10px; transition:border-color 0.2s;
+}
+.task-item.done-item { border-left:3px solid var(--done); }
+.task-item.half-item { border-left:3px solid var(--half); }
+.task-item.undone-item { border-left:3px solid var(--undone); }
+.task-header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.task-title { font-size:14px; font-weight:600; flex:1; }
+.task-meta { font-size:12px; color:var(--muted); margin-top:3px; }
+.task-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+
+/* AI BOX */
+.ai-box { background:linear-gradient(135deg,rgba(124,106,247,0.09),rgba(106,247,197,0.04)); border:1px solid rgba(124,106,247,0.28); border-radius:13px; padding:18px; margin-top:14px; display:none; }
+.ai-box.visible { display:block; animation:fadeUp 0.35s ease; }
+.ai-header { display:flex; align-items:center; gap:7px; font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--accent); margin-bottom:12px; }
+.ai-dot { width:7px; height:7px; background:var(--accent3); border-radius:50%; animation:pulse 1.5s infinite; }
+.ai-content { font-size:13.5px; line-height:1.75; white-space:pre-wrap; }
+
+/* PROGRESS */
+.progress-wrap { margin:10px 0; }
+.progress-label { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:5px; }
+.progress-bar { height:7px; background:var(--surface2); border-radius:99px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--accent3)); transition:width 1s ease; }
+
+/* BADGE */
+.badge { display:inline-flex; align-items:center; gap:5px; padding:3px 11px; border-radius:99px; font-size:12px; font-weight:600; margin-bottom:10px; }
+.badge-green { background:rgba(106,247,197,0.13); color:var(--accent3); border:1px solid rgba(106,247,197,0.28); }
+.badge-yellow { background:rgba(247,197,106,0.13); color:var(--accent2); border:1px solid rgba(247,197,106,0.28); }
+.badge-red { background:rgba(247,106,106,0.13); color:var(--danger); border:1px solid rgba(247,106,106,0.28); }
+
+/* STATS */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:13px; padding:18px; text-align:center; }
+.stat-num { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--accent); line-height:1; }
+.stat-label { font-size:11px; color:var(--muted); margin-top:3px; }
+
+/* HISTORY */
+.history-item { background:var(--surface2); border:1px solid var(--border); border-radius:11px; padding:14px 16px; margin-bottom:10px; }
+.history-date { font-size:11px; color:var(--muted); margin-bottom:3px; }
+.history-goal { font-size:14px; font-weight:600; }
+.history-preview { font-size:12px; color:var(--muted); margin-top:4px; line-height:1.5; }
+.history-actions { display:flex; gap:6px; margin-top:10px; }
+
+/* WEEK GRID */
+.week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:7px; margin-top:10px; }
+.day-card { background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:9px 5px; text-align:center; font-size:10px; }
+.day-name { color:var(--muted); margin-bottom:3px; font-size:9px; }
+.day-hours { color:var(--accent); font-weight:700; font-size:15px; }
+.day-task { color:var(--muted); margin-top:2px; font-size:8px; line-height:1.3; }
+
+/* TABLE */
+.table-wrap { overflow-x:auto; margin-top:10px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:var(--surface2); padding:10px 12px; text-align:left; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; border-bottom:1px solid var(--border); }
+td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(124,106,247,0.04); }
+
+/* LOADING */
+.loading-dots { display:inline-flex; gap:4px; align-items:center; }
+.loading-dots span { width:5px; height:5px; background:var(--accent); border-radius:50%; animation:bounce 1.2s infinite; }
+.loading-dots span:nth-child(2) { animation-delay:0.2s; }
+.loading-dots span:nth-child(3) { animation-delay:0.4s; }
+
+/* PAGES */
+.page { display:none; }
+.page.active { display:block; animation:fadeUp 0.28s ease; }
+
+/* EMPTY */
+.empty-state { text-align:center; padding:40px 20px; color:var(--muted); }
+.empty-state .icon { font-size:38px; margin-bottom:10px; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; animation:fadeUp 0.2s ease; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:90%; max-width:560px; max-height:80vh; overflow-y:auto; }
+.modal-header { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+.modal-close { cursor:pointer; color:var(--muted); font-size:20px; background:none; border:none; color:var(--muted); }
+
+/* TABS */
+.tabs { display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
+.tab { padding:7px 14px; border-radius:8px; font-size:12.5px; cursor:pointer; border:1px solid var(--border); background:var(--surface2); color:var(--muted); transition:all 0.18s; }
+.tab.active { background:var(--accent); color:white; border-color:var(--accent); }
+
+/* SECTION TITLE */
+.section-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.6px; margin:20px 0 10px; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">Study<span>AI</span><small>v2.0 — O'quv Planer</small></div>
+  <div class="nav-item active" onclick="showPage('today',this)"><span class="nav-icon">📅</span> Bugungi Vazifalar</div>
+  <div class="nav-item" onclick="showPage('longplan',this)"><span class="nav-icon">🎯</span> Uzoq Muddatli Plan</div>
+  <div class="nav-item" onclick="showPage('ai-plan',this)"><span class="nav-icon">✨</span> AI Ideal Plan</div>
+  <div class="nav-item" onclick="showPage('stats',this)"><span class="nav-icon">📊</span> Statistika</div>
+  <div class="nav-item" onclick="showPage('history',this)"><span class="nav-icon">📚</span> Tarix</div>
+  <div class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span> Sozlamalar</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ===== PAGE: TODAY ===== -->
+<div class="page active" id="page-today">
+  <div class="page-header">📅 Bugungi Vazifalar</div>
+  <div class="page-sub" id="todayDate"></div>
+
+  <div class="card">
+    <div class="card-title">➕ Yangi Vazifa Qo'shish</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Vazifa nomi</label>
+        <input type="text" id="taskName" placeholder="Masalan: IELTS Reading, Algebra..." onkeydown="if(event.key==='Enter')addTask()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Soat</label>
+        <input type="number" id="taskHours" min="0.25" max="12" step="0.25" placeholder="1.5">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Izoh (ixtiyoriy)</label>
+      <input type="text" id="taskNote" placeholder="Masalan: 5-10 bet o'qish, 20 ta mashq..." onkeydown="if(event.key==='Enter')addTask()">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="addTask()">➕ Qo'shish</button>
+      <button class="btn btn-gold" onclick="generateDailyWithAI()" id="dailyAiBtn">🤖 AI Jadval Tuzsin</button>
+    </div>
+  </div>
+
+  <!-- AI Daily Box -->
+  <div class="ai-box" id="dailyAiBox">
+    <div class="ai-header"><div class="ai-dot"></div>AI Kunlik Jadval</div>
+    <div class="ai-content" id="dailyAiText"></div>
+  </div>
+
+  <!-- Tasks List -->
+  <div class="section-title">Bugungi Vazifalar <span id="taskCount" style="color:var(--accent)"></span></div>
+  <div id="tasksList">
+    <div class="empty-state"><div class="icon">📭</div><div>Hali vazifa yo'q</div><div style="font-size:12px;margin-top:4px">Yuqoridan vazifa qo'shing</div></div>
+  </div>
+
+  <!-- Daily Progress -->
+  <div class="card" id="dailyProgressCard" style="display:none">
+    <div class="card-title">📊 Bugungi Progress</div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="dailyProgLabel">0 / 0 vazifa</span><span id="dailyProgPct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="dailyProgBar" style="width:0%"></div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;font-size:12px;">
+      <span>✅ <span id="countDone">0</span> Bajarildi</span>
+      <span>🟡 <span id="countHalf">0</span> Yarim</span>
+      <span>❌ <span id="countUndone">0</span> Bajarilmadi</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: LONG PLAN ===== -->
+<div class="page" id="page-longplan">
+  <div class="page-header">🎯 Uzoq Muddatli Plan</div>
+  <div class="page-sub">Maqsadingizni kiriting — AI real tahlil qiladi</div>
+
+  <div class="card">
+    <div class="card-title">📝 Plan Ma'lumotlari</div>
+    <div class="form-group">
+      <label class="form-label">Maqsadingiz nima?</label>
+      <textarea id="goal" rows="2" placeholder="Masalan: IELTS 7.0 band olmoqchiman..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hozirgi darajangiz</label>
+      <textarea id="current" rows="2" placeholder="Masalan: Ingliz tilim A2, kuniga 1 soat o'qiyman..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Kuniga necha soat?</label>
+        <input type="number" id="hours" min="0.5" max="16" step="0.5" placeholder="3">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Qachon erishmoqchisiz?</label>
+        <input type="text" id="deadline" placeholder="6 oy, 1 yil...">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="analyzePlan()" id="analyzeBtn">🤖 AI Tahlil Qilsin</button>
+      <button class="btn btn-secondary" onclick="clearLongForm()">Tozalash</button>
+    </div>
+  </div>
+
+  <div class="ai-box" id="aiResult">
+    <div class="ai-header"><div class="ai-dot"></div>StudyAI Tahlili</div>
+    <div id="feasibilityBadge"></div>
+    <div id="progressDisplay"></div>
+    <div class="ai-content" id="aiText"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE: AI IDEAL PLAN ===== -->
+<div class="page" id="page-ai-plan">
+  <div class="page-header">✨ AI Ideal Plan</div>
+  <div class="page-sub">AI sizga kunlik, haftalik, oylik mukammal plan tuzib beradi</div>
+
+  <div class="card">
+    <div class="card-title">🎓 Ma'lumotlarni Kiriting</div>
+    <div class="form-group">
+      <label class="form-label">Maqsad</label>
+      <textarea id="idealGoal" rows="2" placeholder="IELTS 7.5, Python dasturchi, Matematika..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Hozirgi daraja</label>
+        <input type="text" id="idealCurrent" placeholder="Boshlang'ich, A2...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Muddat (oy)</label>
+        <input type="number" id="idealMonths" min="1" max="24" placeholder="6">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kuniga necha soat?</label>
+      <input type="number" id="idealHours" min="1" max="12" placeholder="3">
+    </div>
+    <button class="btn btn-gold" onclick="generateIdealPlan()" id="idealBtn">✨ Ideal Plan Yaratish</button>
+  </div>
+
+  <div class="ai-box" id="idealPlanResult">
+    <div class="ai-header"><div class="ai-dot"></div>AI Ideal Plan</div>
+    <div class="ai-content" id="idealPlanText"></div>
+    <div id="weekGridContainer" style="margin-top:18px"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE: STATS ===== -->
+<div class="page" id="page-stats">
+  <div class="page-header">📊 Statistika</div>
+  <div class="page-sub">Haftalik va umumiy natijalaringiz</div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="st1">0</div><div class="stat-label">Jami Vazifalar</div></div>
+    <div class="stat-card"><div class="stat-num" id="st2" style="color:var(--done)">0</div><div class="stat-label">Bajarildi ✅</div></div>
+    <div class="stat-card"><div class="stat-num" id="st3" style="color:var(--half)">0</div><div class="stat-label">Yarim 🟡</div></div>
+    <div class="stat-card"><div class="stat-num" id="st4" style="color:var(--danger)">0</div><div class="stat-label">Bajarilmadi ❌</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📈 Haftalik Jadval</div>
+    <div class="table-wrap">
+      <table id="statsTable">
+        <thead><tr><th>Sana</th><th>Vazifalar</th><th>✅</th><th>🟡</th><th>❌</th><th>Foiz</th></tr></thead>
+        <tbody id="statsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🤖 AI Tahlil</div>
+    <button class="btn btn-primary" onclick="analyzeStats()" id="statsAiBtn">AI Haftalik Tahlil Qilsin</button>
+    <div class="ai-box" id="statsAiBox" style="margin-top:14px">
+      <div class="ai-header"><div class="ai-dot"></div>Haftalik Tahlil</div>
+      <div class="ai-content" id="statsAiText"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: HISTORY ===== -->
+<div class="page" id="page-history">
+  <div class="page-header">📚 Tarix</div>
+  <div class="page-sub">Barcha saqlangan plan va vazifalar</div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button class="btn btn-secondary btn-sm" onclick="filterHistory('all')" id="fAll">Hammasi</button>
+    <button class="btn btn-secondary btn-sm" onclick="filterHistory('analysis')" id="fAn">Tahlillar</button>
+    <button class="btn btn-secondary btn-sm" onclick="filterHistory('ideal-plan')" id="fId">Ideal Planlar</button>
+    <button class="btn btn-danger btn-sm" onclick="clearAllHistory()">🗑️ Hammasini o'chirish</button>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- ===== PAGE: SETTINGS ===== -->
+<div class="page" id="page-settings">
+  <div class="page-header">⚙️ Sozlamalar</div>
+  <div class="page-sub">API key va boshqa sozlamalar</div>
+
+  <div class="card">
+    <div class="card-title">🔑 Groq API Key</div>
+    <div class="form-group">
+      <label class="form-label">API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="saveApiKey()">💾 Saqlash</button>
+      <button class="btn btn-secondary" onclick="toggleShowKey()">👁️ Ko'rish</button>
+    </div>
+    <div id="apiStatus" style="margin-top:10px;font-size:13px;color:var(--muted)"></div>
+    <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:9px;font-size:12px;color:var(--muted);line-height:1.6">
+      💡 <strong style="color:var(--text)">API Key qayerdan olish:</strong><br>
+      1. <strong>console.groq.com</strong> ga kiring<br>
+      2. Google akkaunt bilan kiring<br>
+      3. "API Keys" → "Create API Key"<br>
+      4. Keyni nusxalab bu yerga joylashtiring
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 Foydalanuvchi Ma'lumotlari</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Ismingiz</label>
+        <input type="text" id="userName" placeholder="Masalan: Jasur">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Maqsadingiz (qisqa)</label>
+        <input type="text" id="userGoal" placeholder="Masalan: IELTS 7.0">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveUserInfo()">💾 Saqlash</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--danger)">⚠️ Xavfli Zona</div>
+    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Barcha Ma'lumotlarni O'chirish</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODAL: History Detail -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modalTitle">Plan Tafsiloti</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="ai-content" id="modalContent" style="font-size:13px;line-height:1.7"></div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let tasks = JSON.parse(localStorage.getItem('sai-tasks') || '[]');
+let history = JSON.parse(localStorage.getItem('sai-history') || '[]');
+let allTasks = JSON.parse(localStorage.getItem('sai-alltasks') || '[]'); // all time tasks
+let userInfo = JSON.parse(localStorage.getItem('sai-user') || '{}');
+let currentFilter = 'all';
+
+// ===== INIT =====
+window.onload = () => {
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('uz-UZ', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  loadApiKey();
+  loadUserInfo();
+  renderTasks();
+  renderStats();
+};
+
+// ===== API KEY =====
+function getApiKey() { return localStorage.getItem('sai-apikey') || ''; }
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { alert("API keyni kiriting!"); return; }
+  localStorage.setItem('sai-apikey', key);
+  document.getElementById('apiStatus').innerHTML = '<span style="color:var(--done)">✅ API Key saqlandi!</span>';
+  setTimeout(()=>{ document.getElementById('apiStatus').textContent=''; }, 3000);
+}
+function loadApiKey() {
+  const k = getApiKey();
+  if (k) {
+    document.getElementById('apiKeyInput').value = k;
+    document.getElementById('apiStatus').innerHTML = '<span style="color:var(--done)">✅ API Key mavjud</span>';
+  }
+}
+function toggleShowKey() {
+  const inp = document.getElementById('apiKeyInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function saveUserInfo() {
+  userInfo = { name: document.getElementById('userName').value, goal: document.getElementById('userGoal').value };
+  localStorage.setItem('sai-user', JSON.stringify(userInfo));
+  alert("Saqlandi! ✅");
+}
+function loadUserInfo() {
+  if (userInfo.name) document.getElementById('userName').value = userInfo.name;
+  if (userInfo.goal) document.getElementById('userGoal').value = userInfo.goal;
+}
+
+// ===== AI CALL =====
+async function callAI(prompt) {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify({ prompt })
+  });
+  const data = await response.json();
+  if (data.error) throw new Error("API xato: " + data.error.message);
+  if (!data.choices || !data.choices[0]) throw new Error("Javob kelmadi!");
+  return data.choices[0].message.content;
+}
+
+// ===== NAV =====
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name==='history') renderHistory();
+  if (name==='stats') renderStats();
+}
+
+// ===== TASKS =====
+function addTask() {
+  const name = document.getElementById('taskName').value.trim();
+  const hours = document.getElementById('taskHours').value;
+  const note = document.getElementById('taskNote').value.trim();
+  if (!name) { alert("Vazifa nomini kiriting!"); return; }
+  const task = {
+    id: Date.now(),
+    name, hours: hours || '?', note,
+    status: 'pending',
+    date: new Date().toLocaleDateString('uz-UZ'),
+    dateKey: new Date().toISOString().split('T')[0]
+  };
+  tasks.unshift(task);
+  allTasks.unshift(task);
+  saveTasks();
+  document.getElementById('taskName').value = '';
+  document.getElementById('taskHours').value = '';
+  document.getElementById('taskNote').value = '';
+  renderTasks();
+}
+
+function setStatus(id, status) {
+  const t = tasks.find(t => t.id === id);
+  const at = allTasks.find(t => t.id === id);
+  if (t) t.status = status;
+  if (at) at.status = status;
+  saveTasks();
+  renderTasks();
+  renderStats();
+}
+
+function deleteTask(id) {
+  if (!confirm("Bu vazifani o'chirmoqchimisiz?")) return;
+  tasks = tasks.filter(t => t.id !== id);
+  allTasks = allTasks.filter(t => t.id !== id);
+  saveTasks();
+  renderTasks();
+}
+
+function saveTasks() {
+  localStorage.setItem('sai-tasks', JSON.stringify(tasks));
+  localStorage.setItem('sai-alltasks', JSON.stringify(allTasks));
+}
+
+function renderTasks() {
+  // Only today's tasks
+  const today = new Date().toISOString().split('T')[0];
+  const todayTasks = tasks.filter(t => t.dateKey === today);
+  
+  const list = document.getElementById('tasksList');
+  const card = document.getElementById('dailyProgressCard');
+
+  document.getElementById('taskCount').textContent = todayTasks.length ? `(${todayTasks.length})` : '';
+
+  if (!todayTasks.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><div>Bugun hali vazifa yo'q</div></div>`;
+    card.style.display = 'none';
+    return;
+  }
+
+  card.style.display = 'block';
+
+  list.innerHTML = todayTasks.map(t => {
+    const cls = t.status !== 'pending' ? t.status+'-item' : '';
+    const statusIcon = t.status==='done' ? '✅' : t.status==='half' ? '🟡' : t.status==='undone' ? '❌' : '⏳';
+    return `
+    <div class="task-item ${cls}" id="task-${t.id}">
+      <div class="task-header">
+        <div>
+          <div class="task-title">${statusIcon} ${t.name}</div>
+          <div class="task-meta">${t.hours ? t.hours+' soat' : ''} ${t.note ? '• '+t.note : ''}</div>
+        </div>
+        <div class="task-actions">
+          <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">🗑️</button>
+        </div>
+      </div>
+      <div class="status-btns">
+        <button class="status-btn done ${t.status==='done'?'active':''}" onclick="setStatus(${t.id},'done')">✅ Bajarildi</button>
+        <button class="status-btn half ${t.status==='half'?'active':''}" onclick="setStatus(${t.id},'half')">🟡 Yarim</button>
+        <button class="status-btn undone ${t.status==='undone'?'active':''}" onclick="setStatus(${t.id},'undone')">❌ Bajarilmadi</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Progress
+  const done = todayTasks.filter(t=>t.status==='done').length;
+  const half = todayTasks.filter(t=>t.status==='half').length;
+  const undone = todayTasks.filter(t=>t.status==='undone').length;
+  const total = todayTasks.length;
+  const pct = total ? Math.round(((done + half*0.5) / total) * 100) : 0;
+
+  document.getElementById('dailyProgLabel').textContent = `${done + half} / ${total} vazifa`;
+  document.getElementById('dailyProgPct').textContent = pct + '%';
+  document.getElementById('dailyProgBar').style.width = pct + '%';
+  document.getElementById('countDone').textContent = done;
+  document.getElementById('countHalf').textContent = half;
+  document.getElementById('countUndone').textContent = undone;
+}
+
+// ===== GENERATE DAILY WITH AI =====
+async function generateDailyWithAI() {
+  const subject = document.getElementById('taskName').value.trim() || (userInfo.goal || 'umumiy o\'qish');
+  const btn = document.getElementById('dailyAiBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span>';
+
+  const prompt = `Sen o'quv rejasi mutaxassisisan. Bugun uchun ${userInfo.name ? userInfo.name+'ga' : 'talabaga'} kunlik jadval tuz.
+Maqsad: ${userInfo.goal || subject}
+Bugungi mavzu: ${subject}
+
+Bugungi kunlik jadval (O'zbek tilida, qisqa va aniq):
+- Har bir vazifani soat va daqiqada yoz
+- 45-50 daqiqa dars, 10 daqiqa dam
+- 5-6 ta aniq vazifa
+- Oxirida 1 ta motivatsion gap
+
+Format: ⏰ 09:00-09:45 — [Vazifa nomi] ([soat])`;
+
+  try {
+    const text = await callAI(prompt);
+    document.getElementById('dailyAiText').textContent = text;
+    document.getElementById('dailyAiBox').classList.add('visible');
+  } catch(e) {
+    document.getElementById('dailyAiText').textContent = "Xatolik: " + e.message;
+    document.getElementById('dailyAiBox').classList.add('visible');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🤖 AI Jadval Tuzsin';
+}
+
+// ===== ANALYZE PLAN =====
+async function analyzePlan() {
+  const goal = document.getElementById('goal').value.trim();
+  const current = document.getElementById('current').value.trim();
+  const hours = document.getElementById('hours').value;
+  const deadline = document.getElementById('deadline').value.trim();
+  if (!goal||!current||!hours||!deadline) { alert("Barcha maydonlarni to'ldiring!"); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span> Tahlil...';
+  document.getElementById('aiResult').classList.remove('visible');
+
+  const prompt = `Sen o'quv reja mutaxassisisan. O'zbek tilida javob ber.
+
+MAQSAD: ${goal}
+HOZIRGI DARAJA: ${current}
+KUNLIK VAQT: ${hours} soat
+MO'LJAL: ${deadline}
+
+Tahlil formati:
+AMALGA OSHISH: X%
+REAL MUDDAT: ...
+---
+Batafsil: har kuni nima qilish kerak, nechta soat, qanday resurslar. 250 so'z.`;
+
+  try {
+    const text = await callAI(prompt);
+    const pctMatch = text.match(/AMALGA OSHISH:\s*(\d+)/i);
+    const pct = pctMatch ? parseInt(pctMatch[1]) : 60;
+    let badgeClass = pct>=70?'badge-green':pct>=40?'badge-yellow':'badge-red';
+    let badgeText = pct>=70?'✅ Mumkin':pct>=40?'⚠️ Qiyin':'❌ Juda qiyin';
+    document.getElementById('feasibilityBadge').innerHTML = `<div class="badge ${badgeClass}">${badgeText} — ${pct}%</div>`;
+    document.getElementById('progressDisplay').innerHTML = `<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="animBar" style="width:0%"></div></div></div>`;
+    document.getElementById('aiText').textContent = text;
+    document.getElementById('aiResult').classList.add('visible');
+    setTimeout(()=>{ const b=document.getElementById('animBar'); if(b) b.style.width=pct+'%'; },100);
+
+    const entry = { id:Date.now(), date:new Date().toLocaleDateString('uz-UZ'), goal, result:text, pct, type:'analysis' };
+    history.unshift(entry);
+    localStorage.setItem('sai-history', JSON.stringify(history));
+  } catch(e) {
+    document.getElementById('aiText').textContent = "Xatolik: "+e.message;
+    document.getElementById('aiResult').classList.add('visible');
+  }
+  btn.disabled=false; btn.innerHTML='🤖 AI Tahlil Qilsin';
+}
+
+// ===== IDEAL PLAN =====
+async function generateIdealPlan() {
+  const goal=document.getElementById('idealGoal').value.trim();
+  const current=document.getElementById('idealCurrent').value.trim();
+  const months=document.getElementById('idealMonths').value;
+  const hours=document.getElementById('idealHours').value;
+  if (!goal||!current||!months||!hours) { alert("Barcha maydonlarni to'ldiring!"); return; }
+
+  const btn=document.getElementById('idealBtn');
+  btn.disabled=true; btn.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
+
+  const prompt = `Professional ta'lim mutaxassisi sifatida, O'zbek tilida IDEAL reja tuz:
+MAQSAD: ${goal} | DARAJA: ${current} | MUDDAT: ${months} oy | KUNLIK VAQT: ${hours} soat
+
+📅 OYLIK REJA:
+📆 HAFTALIK TAQSIMLASH (har kun soat bilan):
+⏰ KUNLIK JADVAL NAMUNASI:
+📚 TAVSIYA RESURSLAR:
+💡 MASLAHATLAR:`;
+
+  try {
+    const text = await callAI(prompt);
+    document.getElementById('idealPlanText').textContent = text;
+    const days=['Du','Se','Ch','Pa','Ju','Sh','Ya'];
+    const h=parseInt(hours);
+    const dayH=[h,h,Math.max(1,h-1),h,h,h+1,Math.max(1,Math.round(h*0.5))];
+    const dayT=['Nazariya','Amaliyot','Takror','Yangi','Test','Chuqur','Dam'];
+    let g=`<div class="card-title" style="color:var(--accent2);margin-top:16px">📆 Haftalik Soat</div><div class="week-grid">`;
+    days.forEach((d,i)=>{ g+=`<div class="day-card"><div class="day-name">${d}</div><div class="day-hours">${dayH[i]}s</div><div class="day-task">${dayT[i]}</div></div>`; });
+    g+='</div>';
+    document.getElementById('weekGridContainer').innerHTML=g;
+    document.getElementById('idealPlanResult').classList.add('visible');
+
+    const entry={id:Date.now(),date:new Date().toLocaleDateString('uz-UZ'),goal,result:text,type:'ideal-plan'};
+    history.unshift(entry);
+    localStorage.setItem('sai-history',JSON.stringify(history));
+  } catch(e) {
+    document.getElementById('idealPlanText').textContent="Xatolik: "+e.message;
+    document.getElementById('idealPlanResult').classList.add('visible');
+  }
+  btn.disabled=false; btn.innerHTML='✨ Ideal Plan Yaratish';
+}
+
+// ===== STATS =====
+function renderStats() {
+  const total=allTasks.length;
+  const done=allTasks.filter(t=>t.status==='done').length;
+  const half=allTasks.filter(t=>t.status==='half').length;
+  const undone=allTasks.filter(t=>t.status==='undone').length;
+  document.getElementById('st1').textContent=total;
+  document.getElementById('st2').textContent=done;
+  document.getElementById('st3').textContent=half;
+  document.getElementById('st4').textContent=undone;
+
+  // Group by date
+  const byDate={};
+  allTasks.forEach(t=>{
+    const d=t.dateKey||t.date;
+    if (!byDate[d]) byDate[d]={date:t.date||d,tasks:[],done:0,half:0,undone:0,pending:0};
+    byDate[d].tasks.push(t);
+    byDate[d][t.status]++;
+  });
+
+  const tbody=document.getElementById('statsBody');
+  const keys=Object.keys(byDate).sort().reverse().slice(0,14);
+  if (!keys.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Hali statistika yo\'q</td></tr>'; return; }
+  tbody.innerHTML=keys.map(k=>{
+    const d=byDate[k];
+    const total=d.tasks.length;
+    const pct=total?Math.round(((d.done+d.half*0.5)/total)*100):0;
+    const color=pct>=80?'var(--done)':pct>=50?'var(--half)':'var(--danger)';
+    return `<tr>
+      <td>${d.date}</td>
+      <td>${total}</td>
+      <td style="color:var(--done)">${d.done}</td>
+      <td style="color:var(--half)">${d.half}</td>
+      <td style="color:var(--danger)">${d.undone}</td>
+      <td><span style="color:${color};font-weight:600">${pct}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+async function analyzeStats() {
+  const btn=document.getElementById('statsAiBtn');
+  btn.disabled=true; btn.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
+
+  const total=allTasks.length;
+  const done=allTasks.filter(t=>t.status==='done').length;
+  const half=allTasks.filter(t=>t.status==='half').length;
+  const undone=allTasks.filter(t=>t.status==='undone').length;
+  const pct=total?Math.round(((done+half*0.5)/total)*100):0;
+
+  const prompt=`Talabaning o'quv statistikasini tahlil qil va O'zbek tilida maslahat ber:
+Jami vazifalar: ${total}
+Bajarildi: ${done} (${pct}%)
+Yarim bajarildi: ${half}
+Bajarilmadi: ${undone}
+${userInfo.goal?'Maqsad: '+userInfo.goal:''}
+
+Qisqa tahlil va 3 ta aniq maslahat ber. 150 so'z.`;
+
+  try {
+    const text=await callAI(prompt);
+    document.getElementById('statsAiText').textContent=text;
+    document.getElementById('statsAiBox').classList.add('visible');
+  } catch(e) {
+    document.getElementById('statsAiText').textContent="Xatolik: "+e.message;
+    document.getElementById('statsAiBox').classList.add('visible');
+  }
+  btn.disabled=false; btn.innerHTML='AI Haftalik Tahlil Qilsin';
+}
+
+// ===== HISTORY =====
+function renderHistory(filter) {
+  if (filter) currentFilter=filter;
+  const list=document.getElementById('historyList');
+  let filtered=history;
+  if (currentFilter!=='all') filtered=history.filter(h=>h.type===currentFilter);
+  if (!filtered.length) {
+    list.innerHTML=`<div class="empty-state"><div class="icon">📭</div><div>Hali tarix yo'q</div></div>`;
+    return;
+  }
+  list.innerHTML=filtered.map(h=>`
+    <div class="history-item">
+      <div class="history-date">${h.date} • ${h.type==='ideal-plan'?'✨ Ideal Plan':'🔍 Tahlil'} ${h.pct?'• '+h.pct+'%':''}</div>
+      <div class="history-goal">${h.goal}</div>
+      <div class="history-preview">${h.result?h.result.substring(0,120)+'...':''}</div>
+      <div class="history-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openModal('${h.id}')">👁️ Ko'rish</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteHistory('${h.id}')">🗑️ O'chirish</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterHistory(f) {
+  currentFilter=f;
+  ['all','analysis','ideal-plan'].forEach(x=>{
+    const el=document.getElementById('f'+{all:'All',analysis:'An','ideal-plan':'Id'}[x]);
+    if(el) el.className='btn btn-secondary btn-sm'+(x===f?' active':'');
+  });
+  renderHistory();
+}
+
+function deleteHistory(id) {
+  if (!confirm("Bu tarixni o'chirmoqchimisiz?")) return;
+  history=history.filter(h=>h.id!=id);
+  localStorage.setItem('sai-history',JSON.stringify(history));
+  renderHistory();
+}
+
+function clearAllHistory() {
+  if (!confirm("Barcha tarixni o'chirmoqchimisiz?")) return;
+  history=[];
+  localStorage.setItem('sai-history','[]');
+  renderHistory();
+}
+
+function openModal(id) {
+  const h=history.find(x=>x.id==id);
+  if (!h) return;
+  document.getElementById('modalTitle').textContent=h.goal;
+  document.getElementById('modalContent').textContent=h.result;
+  document.getElementById('historyModal').classList.add('open');
+}
+function closeModal() { document.getElementById('historyModal').classList.remove('open'); }
+
+// ===== MISC =====
+function clearLongForm() {
+  ['goal','current','hours','deadline'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('aiResult').classList.remove('visible');
+}
+
+function clearAllData() {
+  if (!confirm("BARCHA ma'lumotlar o'chiriladi! Davom etasizmi?")) return;
+  localStorage.clear();
+  location.reload();
+}
+
+// Click outside modal to close
+document.getElementById('historyModal').addEventListener('click', function(e) {
+  if (e.target===this) closeModal();
+});
+</script>
+</body>
+</html>
