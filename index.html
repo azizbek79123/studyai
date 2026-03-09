@@ -385,22 +385,9 @@ tr:hover td { background:rgba(124,106,247,0.04); }
   <div class="page-sub">API key va boshqa sozlamalar</div>
 
   <div class="card">
-    <div class="card-title">🔑 Groq API Key</div>
-    <div class="form-group">
-      <label class="form-label">API Key</label>
-      <input type="password" id="apiKeyInput" placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx">
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="saveApiKey()">💾 Saqlash</button>
-      <button class="btn btn-secondary" onclick="toggleShowKey()">👁️ Ko'rish</button>
-    </div>
-    <div id="apiStatus" style="margin-top:10px;font-size:13px;color:var(--muted)"></div>
-    <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:9px;font-size:12px;color:var(--muted);line-height:1.6">
-      💡 <strong style="color:var(--text)">API Key qayerdan olish:</strong><br>
-      1. <strong>console.groq.com</strong> ga kiring<br>
-      2. Google akkaunt bilan kiring<br>
-      3. "API Keys" → "Create API Key"<br>
-      4. Keyni nusxalab bu yerga joylashtiring
+    <div class="card-title">🔑 AI Ulanishi</div>
+    <div style="padding:12px;background:var(--surface2);border-radius:9px;font-size:13px;color:var(--done);line-height:1.6">
+      ✅ AI muvaffaqiyatli ulangan! Barcha funksiyalar ishlayapti.
     </div>
   </div>
 
@@ -653,18 +640,25 @@ async function analyzePlan() {
   btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span> Tahlil...';
   document.getElementById('aiResult').classList.remove('visible');
 
-  const prompt = `Sen o'quv reja mutaxassisisan. O'zbek tilida javob ber.
+  const prompt = `Sen qattiq va realistic o'quv reja mutaxassisisan. O'zbek tilida javob ber. Hech qachon yolg'on umid berma.
 
 MAQSAD: ${goal}
 HOZIRGI DARAJA: ${current}
 KUNLIK VAQT: ${hours} soat
 MO'LJAL: ${deadline}
 
+QOIDALAR:
+- Kuniga 1-2 soat bilan 6 oyda IELTS 9 MUMKIN EMAS → 10-20% ber
+- Realistic bo'l, oshirib yubormа
+- Agar ilojsiz bo'lsa "ILOJSIZ" de va nima uchun tushuntir
+- Agar qiyin bo'lsa 30-50% ber
+- Faqat haqiqatan mumkin bo'lsa 70%+ ber
+
 Tahlil formati:
 AMALGA OSHISH: X%
 REAL MUDDAT: ...
 ---
-Batafsil: har kuni nima qilish kerak, nechta soat, qanday resurslar. 250 so'z.`;
+Batafsil: nima uchun bu foiz, har kuni nima qilish kerak, qanday resurslar. 250 so'z.`;
 
   try {
     const text = await callAI(prompt);
