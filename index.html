@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StudyAI v2 — O'quv Planer</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --bg: #08090f;
@@ -190,11 +191,35 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 </style>
 </head>
 <body>
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;text-align:center;max-width:400px;width:90%;">
+    <div style="font-family:Syne,sans-serif;font-size:32px;font-weight:800;color:var(--accent);margin-bottom:8px">Study<span style="color:var(--accent2)">AI</span></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:32px">O'quv Planer — AI yordamida o'qing</div>
+    <div id="googleBtn" style="display:flex;justify-content:center;margin-bottom:16px"></div>
+    <div style="font-size:11px;color:var(--muted)">Google akkauntingiz bilan kiring</div>
+    <div style="margin-top:24px;padding:12px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--muted)">
+      🔒 Ma'lumotlaringiz xavfsiz.<br>Faqat ism va email olinadi.
+    </div>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted)">© Axmadov Azizbek tomonidan yaratilgan</div>
+  </div>
+</div>
+
 <div class="app">
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">Study<span>AI</span><small>v2.0 — O'quv Planer</small></div>
+<div id="userCard" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <img id="userAvatar" src="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">
+    <div>
+      <div id="userName" style="font-size:13px;font-weight:600;color:var(--text)"></div>
+      <div id="userEmail" style="font-size:10px;color:var(--muted)"></div>
+    </div>
+  </div>
+  <button onclick="signOut()" style="width:100%;margin-top:8px;padding:5px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-size:11px;cursor:pointer;">🚪 Chiqish</button>
+</div>
   <div class="nav-item active" onclick="showPage('today',this)"><span class="nav-icon">📅</span> Bugungi Vazifalar</div>
   <div class="nav-item" onclick="showPage('longplan',this)"><span class="nav-icon">🎯</span> Uzoq Muddatli Plan</div>
   <div class="nav-item" onclick="showPage('ai-plan',this)"><span class="nav-icon">✨</span> AI Ideal Plan</div>
@@ -292,9 +317,7 @@ tr:hover td { background:rgba(124,106,247,0.04); }
   </div>
 
   <div class="ai-box" id="aiResult">
-    <div class="ai-header"><div class="ai-dot"></div>StudyAI Tahlili</div>
-    <div id="feasibilityBadge"></div>
-    <div id="progressDisplay"></div>
+    <div class="ai-header"><div class="ai-dot"></div>✨ StudyAI Tahlili</div>
     <div class="ai-content" id="aiText"></div>
   </div>
 </div>
@@ -412,6 +435,9 @@ tr:hover td { background:rgba(124,106,247,0.04); }
   </div>
 </div>
 
+  <div style="position:fixed;bottom:12px;right:16px;font-size:11px;color:var(--muted);z-index:10;">
+    © Axmadov Azizbek
+  </div>
 </main>
 </div>
 
@@ -427,6 +453,72 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 </div>
 
 <script>
+// ===== GOOGLE LOGIN =====
+const GOOGLE_CLIENT_ID = '189889097085-0d5gt7vphakjnngoes1qbrok9t8ttiks.apps.googleusercontent.com';
+
+function initGoogleLogin() {
+  const saved = localStorage.getItem('sai-user-google');
+  if (saved) {
+    const u = JSON.parse(saved);
+    showUserInSidebar(u);
+    document.getElementById('loginOverlay').style.display = 'none';
+    return;
+  }
+  document.getElementById('loginOverlay').style.display = 'flex';
+  
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleLogin,
+    auto_select: false
+  });
+  
+  google.accounts.id.renderButton(
+    document.getElementById('googleBtn'),
+    { 
+      theme: 'filled_black',
+      size: 'large',
+      text: 'signin_with',
+      shape: 'rectangular',
+      width: 280
+    }
+  );
+}
+
+async function handleGoogleLogin(response) {
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: response.credential })
+    });
+    const user = await res.json();
+    if (user.error) throw new Error(user.error);
+    
+    localStorage.setItem('sai-user-google', JSON.stringify(user));
+    userInfo = { name: user.given_name || user.name, goal: '' };
+    localStorage.setItem('sai-user', JSON.stringify(userInfo));
+    
+    showUserInSidebar(user);
+    document.getElementById('loginOverlay').style.display = 'none';
+  } catch(e) {
+    alert("Kirish xatoligi: " + e.message);
+  }
+}
+
+function showUserInSidebar(user) {
+  document.getElementById('userCard').style.display = 'block';
+  document.getElementById('userName').textContent = user.given_name || user.name;
+  document.getElementById('userEmail').textContent = user.email;
+  if (user.picture) document.getElementById('userAvatar').src = user.picture;
+}
+
+function signOut() {
+  if (!confirm("Chiqmoqchimisiz?")) return;
+  localStorage.removeItem('sai-user-google');
+  google.accounts.id.disableAutoSelect();
+  location.reload();
+}
+
 // ===== STATE =====
 let tasks = JSON.parse(localStorage.getItem('sai-tasks') || '[]');
 let history = JSON.parse(localStorage.getItem('sai-history') || '[]');
@@ -436,6 +528,13 @@ let currentFilter = 'all';
 
 // ===== INIT =====
 window.onload = () => {
+  // Wait for Google script to load
+  const tryInit = setInterval(() => {
+    if (typeof google !== 'undefined') {
+      clearInterval(tryInit);
+      initGoogleLogin();
+    }
+  }, 100);
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('uz-UZ', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   loadApiKey();
   loadUserInfo();
@@ -640,37 +739,38 @@ async function analyzePlan() {
   btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span> Tahlil...';
   document.getElementById('aiResult').classList.remove('visible');
 
-  const prompt = `Sen qattiq va realistic o'quv reja mutaxassisisan. O'zbek tilida javob ber. Hech qachon yolg'on umid berma.
+  const prompt = `Sen professional o'quv reja mutaxassisisan. O'zbek tilida javob ber. Aniq va realistic bo'l.
 
 MAQSAD: ${goal}
 HOZIRGI DARAJA: ${current}
 KUNLIK VAQT: ${hours} soat
 MO'LJAL: ${deadline}
 
-QOIDALAR:
-- Kuniga 1-2 soat bilan 6 oyda IELTS 9 MUMKIN EMAS → 10-20% ber
-- Realistic bo'l, oshirib yubormа
-- Agar ilojsiz bo'lsa "ILOJSIZ" de va nima uchun tushuntir
-- Agar qiyin bo'lsa 30-50% ber
-- Faqat haqiqatan mumkin bo'lsa 70%+ ber
+Quyidagi formatda javob ber:
 
-Tahlil formati:
-AMALGA OSHISH: X%
-REAL MUDDAT: ...
----
-Batafsil: nima uchun bu foiz, har kuni nima qilish kerak, qanday resurslar. 250 so'z.`;
+🎯 XULOSA:
+(Bu maqsad mumkinmi, qiyinmi yoki ilojsizmi — 2-3 jumlada)
+
+⏰ REAL MUDDAT:
+(Haqiqatda qancha vaqt kerak)
+
+📅 KUNLIK REJA:
+(Har kuni aniq nima qilish kerak, soat bilan)
+
+📚 TAVSIYA RESURSLAR:
+(3-5 ta aniq resurs)
+
+💡 MUHIM MASLAHAT:
+(2-3 ta eng muhim maslahat)
+
+Foiz yozma. Faqat aniq, foydali tavsiyalar ber. 300 so'z.`;
 
   try {
     const text = await callAI(prompt);
-    const pctMatch = text.match(/AMALGA OSHISH:\s*(\d+)/i);
-    const pct = pctMatch ? parseInt(pctMatch[1]) : 60;
-    let badgeClass = pct>=70?'badge-green':pct>=40?'badge-yellow':'badge-red';
-    let badgeText = pct>=70?'✅ Mumkin':pct>=40?'⚠️ Qiyin':'❌ Juda qiyin';
-    document.getElementById('feasibilityBadge').innerHTML = `<div class="badge ${badgeClass}">${badgeText} — ${pct}%</div>`;
-    document.getElementById('progressDisplay').innerHTML = `<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="animBar" style="width:0%"></div></div></div>`;
+    document.getElementById('feasibilityBadge').innerHTML = '';
+    document.getElementById('progressDisplay').innerHTML = '';
     document.getElementById('aiText').textContent = text;
     document.getElementById('aiResult').classList.add('visible');
-    setTimeout(()=>{ const b=document.getElementById('animBar'); if(b) b.style.width=pct+'%'; },100);
 
     const entry = { id:Date.now(), date:new Date().toLocaleDateString('uz-UZ'), goal, result:text, pct, type:'analysis' };
     history.unshift(entry);
