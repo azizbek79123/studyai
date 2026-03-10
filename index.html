@@ -466,11 +466,15 @@ function initGoogleLogin() {
   }
   document.getElementById('loginOverlay').style.display = 'flex';
   
+  // Telefon va desktop uchun redirect usuli
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
     callback: handleGoogleLogin,
     auto_select: false,
-    ux_mode: 'popup',
+    ux_mode: isMobile ? 'redirect' : 'popup',
+    redirect_uri: 'https://studyai-dusky.vercel.app',
     cancel_on_tap_outside: false
   });
   
@@ -481,18 +485,22 @@ function initGoogleLogin() {
       size: 'large',
       text: 'signin_with',
       shape: 'rectangular',
-      width: 280,
-      type: 'standard',
-      logo_alignment: 'left'
+      width: 280
     }
   );
-  
-  // Telefon uchun One Tap ham qo'shamiz
-  google.accounts.id.prompt();
 }
 
 async function handleGoogleLogin(response) {
   try {
+    if (!response || !response.credential) {
+      // Check URL params for redirect response
+      const params = new URLSearchParams(window.location.search);
+      const cred = params.get('credential');
+      if (cred) {
+        response = { credential: cred };
+        window.history.replaceState({}, '', window.location.pathname);
+      } else return;
+    }
     // Decode JWT token directly (no backend needed)
     const base64 = response.credential.split('.')[1];
     const decoded = JSON.parse(atob(base64.replace(/-/g, '+').replace(/_/g, '/')));
@@ -538,6 +546,9 @@ let currentFilter = 'all';
 
 // ===== INIT =====
 window.onload = () => {
+  // Check redirect response on load
+  handleGoogleLogin(null);
+  
   // Wait for Google script to load
   const tryInit = setInterval(() => {
     if (typeof google !== 'undefined') {
