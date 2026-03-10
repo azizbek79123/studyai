@@ -419,7 +419,7 @@ tr:hover td { background:rgba(124,106,247,0.04); }
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Ismingiz</label>
-        <input type="text" id="userName" placeholder="Masalan: Jasur">
+        <input type="text" id="userName" placeholder="Masalan: Azizbek">
       </div>
       <div class="form-group">
         <label class="form-label">Maqsadingiz (qisqa)</label>
@@ -469,7 +469,9 @@ function initGoogleLogin() {
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
     callback: handleGoogleLogin,
-    auto_select: false
+    auto_select: false,
+    ux_mode: 'popup',
+    cancel_on_tap_outside: false
   });
   
   google.accounts.id.renderButton(
@@ -479,20 +481,28 @@ function initGoogleLogin() {
       size: 'large',
       text: 'signin_with',
       shape: 'rectangular',
-      width: 280
+      width: 280,
+      type: 'standard',
+      logo_alignment: 'left'
     }
   );
+  
+  // Telefon uchun One Tap ham qo'shamiz
+  google.accounts.id.prompt();
 }
 
 async function handleGoogleLogin(response) {
   try {
-    const res = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: response.credential })
-    });
-    const user = await res.json();
-    if (user.error) throw new Error(user.error);
+    // Decode JWT token directly (no backend needed)
+    const base64 = response.credential.split('.')[1];
+    const decoded = JSON.parse(atob(base64.replace(/-/g, '+').replace(/_/g, '/')));
+    
+    const user = {
+      name: decoded.name,
+      given_name: decoded.given_name,
+      email: decoded.email,
+      picture: decoded.picture
+    };
     
     localStorage.setItem('sai-user-google', JSON.stringify(user));
     userInfo = { name: user.given_name || user.name, goal: '' };
