@@ -192,7 +192,7 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 </head>
 <body>
 <!-- LOGIN OVERLAY -->
-<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;flex-direction:column;" hidden>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;text-align:center;max-width:400px;width:90%;">
     <div style="font-family:Syne,sans-serif;font-size:32px;font-weight:800;color:var(--accent);margin-bottom:8px">Study<span style="color:var(--accent2)">AI</span></div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:32px">O'quv Planer — AI yordamida o'qing</div>
@@ -210,6 +210,9 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">Study<span>AI</span><small>v2.0 — O'quv Planer</small></div>
+<div id="sidebarGoogleBtn" style="display:none;margin-bottom:8px;">
+  <div id="googleBtnSidebar"></div>
+</div>
 <div id="userCard" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
   <div style="display:flex;align-items:center;gap:8px;">
     <img id="userAvatar" src="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">
@@ -461,23 +464,32 @@ function initGoogleLogin() {
   if (saved) {
     const u = JSON.parse(saved);
     showUserInSidebar(u);
-    document.getElementById('loginOverlay').style.display = 'none';
     return;
   }
-  document.getElementById('loginOverlay').style.display = 'flex';
   
-  // Telefon va desktop uchun redirect usuli
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // Show Google login button in sidebar
+  document.getElementById('sidebarGoogleBtn').style.display = 'block';
   
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
     callback: handleGoogleLogin,
     auto_select: false,
-    ux_mode: isMobile ? 'redirect' : 'popup',
-    redirect_uri: 'https://studyai-dusky.vercel.app',
+    ux_mode: 'popup',
     cancel_on_tap_outside: false
   });
   
+  google.accounts.id.renderButton(
+    document.getElementById('googleBtnSidebar'),
+    { 
+      theme: 'filled_black',
+      size: 'medium',
+      text: 'signin_with',
+      shape: 'rectangular',
+      width: 200
+    }
+  );
+  
+  // Also render in overlay
   google.accounts.id.renderButton(
     document.getElementById('googleBtn'),
     { 
@@ -546,9 +558,6 @@ let currentFilter = 'all';
 
 // ===== INIT =====
 window.onload = () => {
-  // Check redirect response on load
-  handleGoogleLogin(null);
-  
   // Wait for Google script to load
   const tryInit = setInterval(() => {
     if (typeof google !== 'undefined') {
