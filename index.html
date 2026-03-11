@@ -2,11 +2,11 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StudyAI v2 — O'quv Planer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>StudyAI v2.0 — O'quv Planer</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-
 <style>
+
 :root {
   --bg: #08090f;
   --surface: #111118;
@@ -252,78 +252,49 @@ tr:hover td { background:rgba(124,106,247,0.04); }
   #mobileHeader { display: none !important; }
   .main { padding-top: 32px !important; }
 }
+
+
+/* Mobile nav */
+#mobileNav { display:none; }
+@media (max-width:768px) {
+  #mobileNav { display:block !important; }
+  main { padding-bottom: 80px !important; }
+  .sidebar { display:none !important; }
+}
 </style>
 </head>
 <body>
-<!-- MOBILE HEADER -->
-<div id="mobileHeader">
-  <div class="logo">Study<span>AI</span></div>
-  <div id="mobileUserName">Xush kelibsiz!</div>
-</div>
-
-<!-- MOBILE BOTTOM NAV -->
-<div id="mobileNav">
-  <button onclick="showPage('tasks'); setMobileActive(this)">
-    <span>📅</span>Vazifalar
-  </button>
-  <button onclick="showPage('long-plan'); setMobileActive(this)">
-    <span>🎯</span>Plan
-  </button>
-  <button onclick="showPage('ai-plan'); setMobileActive(this)">
-    <span>✨</span>AI Plan
-  </button>
-  <button onclick="showPage('stats'); setMobileActive(this)">
-    <span>📊</span>Statistika
-  </button>
-  <button onclick="showPage('settings'); setMobileActive(this)">
-    <span>⚙️</span>Sozlamalar
-  </button>
-</div>
 
 <!-- LOGIN OVERLAY -->
-<div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#16213e 100%);">
+<div id="loginOverlay" style="position:fixed;inset:0;z-index:9999;overflow-y:auto;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#16213e 100%);">
   <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
     <div style="width:100%;max-width:400px;">
-      
-      <!-- Logo -->
       <div style="text-align:center;margin-bottom:32px;">
         <div style="font-family:Syne,sans-serif;font-size:48px;font-weight:800;background:linear-gradient(135deg,#7c6af7,#f7c76a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">StudyAI</div>
-        <div style="font-size:14px;color:#888;margin-top:6px;letter-spacing:1px;">O'quv Planer — AI yordamida o'qing</div>
+        <div style="font-size:14px;color:#888;margin-top:6px;">O'quv Planer — AI yordamida o'qing</div>
       </div>
-
-      <!-- Card -->
       <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 28px;">
-        
         <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">Xush kelibsiz! 👋</div>
         <div style="font-size:13px;color:#888;margin-bottom:24px;">Ma'lumotlaringizni kiriting</div>
-
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;color:#aaa;display:block;margin-bottom:8px;font-weight:500;">👤 ISM</label>
           <input id="regName" type="text" placeholder="Ismingiz" autocomplete="given-name"
-            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;transition:border 0.2s;"
-            onfocus="this.style.borderColor='#7c6af7'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;">
         </div>
-        
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;color:#aaa;display:block;margin-bottom:8px;font-weight:500;">👤 FAMILIYA</label>
           <input id="regSurname" type="text" placeholder="Familiyangiz" autocomplete="family-name"
-            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;"
-            onfocus="this.style.borderColor='#7c6af7'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;">
         </div>
-        
         <div style="margin-bottom:28px;">
           <label style="font-size:12px;color:#aaa;display:block;margin-bottom:8px;font-weight:500;">🎂 TUG'ILGAN KUN</label>
           <input id="regBirth" type="date"
-            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;"
-            onfocus="this.style.borderColor='#7c6af7'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;">
         </div>
-        
-        <button onclick="registerUser()" id="regBtn"
-          style="width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,#7c6af7,#9d8ff7);color:white;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:opacity 0.2s;box-shadow:0 8px 24px rgba(124,106,247,0.4);"
-          onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+        <button onclick="registerUser()"
+          style="width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,#7c6af7,#9d8ff7);color:white;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(124,106,247,0.4);">
           Kirish →
         </button>
-        
         <div style="text-align:center;margin-top:20px;font-size:12px;color:#555;">
           🔒 Ma'lumotlaringiz xavfsiz • © Axmadov Azizbek
         </div>
@@ -331,6 +302,8 @@ tr:hover td { background:rgba(124,106,247,0.04); }
     </div>
   </div>
 </div>
+
+
 
 <div class="app">
 
@@ -601,6 +574,29 @@ tr:hover td { background:rgba(124,106,247,0.04); }
   </div>
 </div>
 
+
+
+<!-- MOBILE BOTTOM NAV -->
+<nav id="mobileNav" style="position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:1000;padding:6px 0 10px;">
+  <div style="display:flex;justify-content:space-around;align-items:center;">
+    <button onclick="showPage('page-today',this)" id="mnav1" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;color:var(--accent);font-size:10px;">
+      <span style="font-size:20px;">📅</span>Vazifalar
+    </button>
+    <button onclick="showPage('page-long',this)" id="mnav2" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;color:var(--muted);font-size:10px;">
+      <span style="font-size:20px;">🎯</span>Plan
+    </button>
+    <button onclick="showPage('page-ai-plan',this)" id="mnav3" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;color:var(--muted);font-size:10px;">
+      <span style="font-size:20px;">✨</span>AI Plan
+    </button>
+    <button onclick="showPage('page-stats',this)" id="mnav4" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;color:var(--muted);font-size:10px;">
+      <span style="font-size:20px;">📊</span>Statistika
+    </button>
+    <button onclick="showPage('page-settings',this)" id="mnav5" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;color:var(--muted);font-size:10px;">
+      <span style="font-size:20px;">⚙️</span>Sozlamalar
+    </button>
+  </div>
+</nav>
+
 <script>
 // ===== USER LOGIN =====
 function initLogin() {
@@ -611,29 +607,22 @@ function initLogin() {
     document.getElementById('loginOverlay').style.display = 'none';
     return;
   }
-  document.getElementById('loginOverlay').style.display = 'flex';
+  // Show login
+  document.getElementById('loginOverlay').style.display = 'block';
 }
 
 function registerUser() {
   const name = document.getElementById('regName').value.trim();
   const surname = document.getElementById('regSurname').value.trim();
   const birth = document.getElementById('regBirth').value;
-  
-  if (!name || !surname || !birth) {
-    alert("Barcha maydonlarni to'ldiring!");
-    return;
-  }
-  
-  const user = { name, surname, birth, given_name: name, email: name + ' ' + surname };
+  if (!name || !surname || !birth) { alert("Barcha maydonlarni to'ldiring!"); return; }
+  const user = { name, surname, birth, given_name: name, email: name+' '+surname };
   localStorage.setItem('sai-user-info', JSON.stringify(user));
-  
-  // Save to Supabase
   saveUserToSupabase(user);
-  
   showUserInSidebar(user);
   document.getElementById('loginOverlay').style.display = 'none';
-  showPage('page-tasks');
-  window.scrollTo(0, 0);
+  showPage('page-today');
+  window.scrollTo(0,0);
 }
 
 async function saveUserToSupabase(user) {
@@ -641,24 +630,20 @@ async function saveUserToSupabase(user) {
     await fetch('/api/saveuser', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: user.name,
-        surname: user.surname,
-        birth: user.birth
-      })
+      body: JSON.stringify({ name: user.name, surname: user.surname, birth: user.birth })
     });
-  } catch(e) { console.log('Supabase error:', e); }
+  } catch(e) { console.log('Supabase:', e); }
 }
 
 function showUserInSidebar(user) {
-  document.getElementById('userCard').style.display = 'block';
-  document.getElementById('userName').textContent = user.given_name || user.name;
-  document.getElementById('userEmail').textContent = user.surname || user.email || '';
+  const card = document.getElementById('userCard');
+  if (card) card.style.display = 'block';
+  const nameEl = document.getElementById('userName');
+  if (nameEl) nameEl.textContent = user.given_name || user.name;
+  const emailEl = document.getElementById('userEmail');
+  if (emailEl) emailEl.textContent = user.surname || '';
   const avatar = document.getElementById('userAvatar');
   if (avatar) avatar.style.display = 'none';
-  // Update mobile header
-  const mun = document.getElementById('mobileUserName');
-  if (mun) mun.textContent = (user.given_name || user.name) + ' ' + (user.surname || '');
 }
 
 function signOut() {
@@ -666,6 +651,18 @@ function signOut() {
   localStorage.removeItem('sai-user-info');
   location.reload();
 }
+
+
+// ===== USER LOGIN =====
+
+
+
+
+
+
+
+
+
 
 // ===== MOBILE =====
 function setMobileActive(btn) {
@@ -1132,6 +1129,7 @@ function clearAllData() {
 document.getElementById('historyModal').addEventListener('click', function(e) {
   if (e.target===this) closeModal();
 });
+
 </script>
 </body>
 </html>
