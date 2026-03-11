@@ -583,9 +583,6 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 <script>
 // ===== USER LOGIN =====
 function initLogin() {
-  // Clear old Google login data
-  localStorage.removeItem('sai-user-google');
-  
   const saved = localStorage.getItem('sai-user-info');
   if (saved) {
     const u = JSON.parse(saved);
@@ -614,6 +611,8 @@ function registerUser() {
   
   showUserInSidebar(user);
   document.getElementById('loginOverlay').style.display = 'none';
+  showPage('page-tasks');
+  window.scrollTo(0, 0);
 }
 
 async function saveUserToSupabase(user) {
