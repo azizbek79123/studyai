@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StudyAI v2 — O'quv Planer</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
 :root {
   --bg: #08090f;
@@ -188,20 +188,141 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .sidebar { display: none !important; }
+  .main { margin-left: 0 !important; max-width: 100vw !important; padding: 16px 14px 80px 14px !important; }
+  .page-header { font-size: 20px !important; }
+  .stats-row { grid-template-columns: 1fr 1fr !important; }
+  .form-row { flex-direction: column !important; }
+  .card { padding: 16px !important; }
+  #mobileNav { display: flex !important; }
+  #mobileHeader { display: flex !important; }
+}
+
+/* Mobile header */
+#mobileHeader {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+}
+#mobileHeader .logo { font-family: Syne,sans-serif; font-size: 20px; font-weight: 800; color: var(--accent); }
+#mobileHeader .logo span { color: var(--accent2); }
+#mobileUserName { font-size: 12px; color: var(--muted); }
+
+/* Mobile bottom nav */
+#mobileNav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  justify-content: space-around;
+  align-items: center;
+}
+#mobileNav button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  min-width: 50px;
+}
+#mobileNav button.active { color: var(--accent); }
+#mobileNav button span { font-size: 20px; }
+
+@media (min-width: 769px) {
+  #mobileNav { display: none !important; }
+  #mobileHeader { display: none !important; }
+  .main { padding-top: 32px !important; }
+}
 </style>
 </head>
 <body>
+<!-- MOBILE HEADER -->
+<div id="mobileHeader">
+  <div class="logo">Study<span>AI</span></div>
+  <div id="mobileUserName">Xush kelibsiz!</div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div id="mobileNav">
+  <button onclick="showPage('tasks'); setMobileActive(this)">
+    <span>📅</span>Vazifalar
+  </button>
+  <button onclick="showPage('long-plan'); setMobileActive(this)">
+    <span>🎯</span>Plan
+  </button>
+  <button onclick="showPage('ai-plan'); setMobileActive(this)">
+    <span>✨</span>AI Plan
+  </button>
+  <button onclick="showPage('stats'); setMobileActive(this)">
+    <span>📊</span>Statistika
+  </button>
+  <button onclick="showPage('settings'); setMobileActive(this)">
+    <span>⚙️</span>Sozlamalar
+  </button>
+</div>
+
 <!-- LOGIN OVERLAY -->
-<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;flex-direction:column;" hidden>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;text-align:center;max-width:400px;width:90%;">
-    <div style="font-family:Syne,sans-serif;font-size:32px;font-weight:800;color:var(--accent);margin-bottom:8px">Study<span style="color:var(--accent2)">AI</span></div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:32px">O'quv Planer — AI yordamida o'qing</div>
-    <div id="googleBtn" style="display:flex;justify-content:center;margin-bottom:16px"></div>
-    <div style="font-size:11px;color:var(--muted)">Google akkauntingiz bilan kiring</div>
-    <div style="margin-top:24px;padding:12px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--muted)">
-      🔒 Ma'lumotlaringiz xavfsiz.<br>Faqat ism va email olinadi.
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;">
+  <div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 28px;width:100%;max-width:380px;">
+      
+      <!-- Logo -->
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-family:Syne,sans-serif;font-size:36px;font-weight:800;color:var(--accent)">Study<span style="color:var(--accent2)">AI</span></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">O'quv Planer — AI yordamida o'qing</div>
+      </div>
+
+      <!-- Form -->
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">👤 Ismingiz *</label>
+        <input id="regName" type="text" placeholder="Ismingiz" autocomplete="given-name"
+          style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;box-sizing:border-box;outline:none;">
+      </div>
+      
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">👤 Familiyangiz *</label>
+        <input id="regSurname" type="text" placeholder="Familiyangiz" autocomplete="family-name"
+          style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;box-sizing:border-box;outline:none;">
+      </div>
+      
+      <div style="margin-bottom:24px;">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">🎂 Tug'ilgan kuningiz *</label>
+        <input id="regBirth" type="date"
+          style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;box-sizing:border-box;outline:none;">
+      </div>
+      
+      <button onclick="registerUser()" id="regBtn"
+        style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);color:white;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:0.5px;">
+        Kirish →
+      </button>
+      
+      <div style="text-align:center;margin-top:20px;padding:12px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--muted);">
+        🔒 Ma'lumotlaringiz xavfsiz saqlanadi
+      </div>
+      
+      <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">
+        © Axmadov Azizbek tomonidan yaratilgan
+      </div>
     </div>
-    <div style="margin-top:16px;font-size:11px;color:var(--muted)">© Axmadov Azizbek tomonidan yaratilgan</div>
   </div>
 </div>
 
@@ -210,8 +331,6 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">Study<span>AI</span><small>v2.0 — O'quv Planer</small></div>
-<div id="sidebarGoogleBtn" style="display:none;margin-bottom:8px;">
-  <div id="googleBtnSidebar"></div>
 </div>
 <div id="userCard" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
   <div style="display:flex;align-items:center;gap:8px;">
@@ -456,97 +575,79 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 </div>
 
 <script>
-// ===== GOOGLE LOGIN =====
-const GOOGLE_CLIENT_ID = '189889097085-0d5gt7vphakjnngoes1qbrok9t8ttiks.apps.googleusercontent.com';
-
-function initGoogleLogin() {
-  const saved = localStorage.getItem('sai-user-google');
+// ===== USER LOGIN =====
+function initLogin() {
+  const saved = localStorage.getItem('sai-user-info');
   if (saved) {
     const u = JSON.parse(saved);
     showUserInSidebar(u);
+    document.getElementById('loginOverlay').style.display = 'none';
+    return;
+  }
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+
+function registerUser() {
+  const name = document.getElementById('regName').value.trim();
+  const surname = document.getElementById('regSurname').value.trim();
+  const birth = document.getElementById('regBirth').value;
+  
+  if (!name || !surname || !birth) {
+    alert("Barcha maydonlarni to'ldiring!");
     return;
   }
   
-  // Show Google login button in sidebar
-  document.getElementById('sidebarGoogleBtn').style.display = 'block';
+  const user = { name, surname, birth, given_name: name, email: name + ' ' + surname };
+  localStorage.setItem('sai-user-info', JSON.stringify(user));
   
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleLogin,
-    auto_select: false,
-    ux_mode: 'popup',
-    cancel_on_tap_outside: false
-  });
+  // Save to Supabase
+  saveUserToSupabase(user);
   
-  google.accounts.id.renderButton(
-    document.getElementById('googleBtnSidebar'),
-    { 
-      theme: 'filled_black',
-      size: 'medium',
-      text: 'signin_with',
-      shape: 'rectangular',
-      width: 200
-    }
-  );
-  
-  // Also render in overlay
-  google.accounts.id.renderButton(
-    document.getElementById('googleBtn'),
-    { 
-      theme: 'filled_black',
-      size: 'large',
-      text: 'signin_with',
-      shape: 'rectangular',
-      width: 280
-    }
-  );
+  showUserInSidebar(user);
+  document.getElementById('loginOverlay').style.display = 'none';
 }
 
-async function handleGoogleLogin(response) {
+async function saveUserToSupabase(user) {
   try {
-    if (!response || !response.credential) {
-      // Check URL params for redirect response
-      const params = new URLSearchParams(window.location.search);
-      const cred = params.get('credential');
-      if (cred) {
-        response = { credential: cred };
-        window.history.replaceState({}, '', window.location.pathname);
-      } else return;
-    }
-    // Decode JWT token directly (no backend needed)
-    const base64 = response.credential.split('.')[1];
-    const decoded = JSON.parse(atob(base64.replace(/-/g, '+').replace(/_/g, '/')));
-    
-    const user = {
-      name: decoded.name,
-      given_name: decoded.given_name,
-      email: decoded.email,
-      picture: decoded.picture
-    };
-    
-    localStorage.setItem('sai-user-google', JSON.stringify(user));
-    userInfo = { name: user.given_name || user.name, goal: '' };
-    localStorage.setItem('sai-user', JSON.stringify(userInfo));
-    
-    showUserInSidebar(user);
-    document.getElementById('loginOverlay').style.display = 'none';
-  } catch(e) {
-    alert("Kirish xatoligi: " + e.message);
-  }
+    await fetch('/api/saveuser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: user.name,
+        surname: user.surname,
+        birth: user.birth
+      })
+    });
+  } catch(e) { console.log('Supabase error:', e); }
 }
 
 function showUserInSidebar(user) {
   document.getElementById('userCard').style.display = 'block';
   document.getElementById('userName').textContent = user.given_name || user.name;
-  document.getElementById('userEmail').textContent = user.email;
-  if (user.picture) document.getElementById('userAvatar').src = user.picture;
+  document.getElementById('userEmail').textContent = user.surname || user.email || '';
+  const avatar = document.getElementById('userAvatar');
+  if (avatar) avatar.style.display = 'none';
+  // Update mobile header
+  const mun = document.getElementById('mobileUserName');
+  if (mun) mun.textContent = (user.given_name || user.name) + ' ' + (user.surname || '');
 }
 
 function signOut() {
   if (!confirm("Chiqmoqchimisiz?")) return;
-  localStorage.removeItem('sai-user-google');
-  google.accounts.id.disableAutoSelect();
+  localStorage.removeItem('sai-user-info');
   location.reload();
+}
+
+// ===== MOBILE =====
+function setMobileActive(btn) {
+  document.querySelectorAll('#mobileNav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Set first mobile nav btn active on load
+function initMobileNav() {
+  const btns = document.querySelectorAll('#mobileNav button');
+  if (btns.length) btns[0].classList.add('active');
 }
 
 // ===== STATE =====
@@ -558,13 +659,8 @@ let currentFilter = 'all';
 
 // ===== INIT =====
 window.onload = () => {
-  // Wait for Google script to load
-  const tryInit = setInterval(() => {
-    if (typeof google !== 'undefined') {
-      clearInterval(tryInit);
-      initGoogleLogin();
-    }
-  }, 100);
+  initLogin();
+  initMobileNav();
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('uz-UZ', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   loadApiKey();
   loadUserInfo();
