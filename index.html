@@ -281,46 +281,52 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 </div>
 
 <!-- LOGIN OVERLAY -->
-<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;">
-  <div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 28px;width:100%;max-width:380px;">
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#16213e 100%);">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
+    <div style="width:100%;max-width:400px;">
       
       <!-- Logo -->
-      <div style="text-align:center;margin-bottom:24px;">
-        <div style="font-family:Syne,sans-serif;font-size:36px;font-weight:800;color:var(--accent)">Study<span style="color:var(--accent2)">AI</span></div>
-        <div style="font-size:13px;color:var(--muted);margin-top:4px">O'quv Planer — AI yordamida o'qing</div>
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="font-family:Syne,sans-serif;font-size:48px;font-weight:800;background:linear-gradient(135deg,#7c6af7,#f7c76a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">StudyAI</div>
+        <div style="font-size:14px;color:#888;margin-top:6px;letter-spacing:1px;">O'quv Planer — AI yordamida o'qing</div>
       </div>
 
-      <!-- Form -->
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">👤 Ismingiz *</label>
-        <input id="regName" type="text" placeholder="Ismingiz" autocomplete="given-name"
-          style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;box-sizing:border-box;outline:none;">
-      </div>
-      
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">👤 Familiyangiz *</label>
-        <input id="regSurname" type="text" placeholder="Familiyangiz" autocomplete="family-name"
-          style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;box-sizing:border-box;outline:none;">
-      </div>
-      
-      <div style="margin-bottom:24px;">
-        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">🎂 Tug'ilgan kuningiz *</label>
-        <input id="regBirth" type="date"
-          style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;box-sizing:border-box;outline:none;">
-      </div>
-      
-      <button onclick="registerUser()" id="regBtn"
-        style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);color:white;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:0.5px;">
-        Kirish →
-      </button>
-      
-      <div style="text-align:center;margin-top:20px;padding:12px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--muted);">
-        🔒 Ma'lumotlaringiz xavfsiz saqlanadi
-      </div>
-      
-      <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">
-        © Axmadov Azizbek tomonidan yaratilgan
+      <!-- Card -->
+      <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 28px;">
+        
+        <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">Xush kelibsiz! 👋</div>
+        <div style="font-size:13px;color:#888;margin-bottom:24px;">Ma'lumotlaringizni kiriting</div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;color:#aaa;display:block;margin-bottom:8px;font-weight:500;">👤 ISM</label>
+          <input id="regName" type="text" placeholder="Ismingiz" autocomplete="given-name"
+            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;transition:border 0.2s;"
+            onfocus="this.style.borderColor='#7c6af7'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;color:#aaa;display:block;margin-bottom:8px;font-weight:500;">👤 FAMILIYA</label>
+          <input id="regSurname" type="text" placeholder="Familiyangiz" autocomplete="family-name"
+            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;"
+            onfocus="this.style.borderColor='#7c6af7'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
+        
+        <div style="margin-bottom:28px;">
+          <label style="font-size:12px;color:#aaa;display:block;margin-bottom:8px;font-weight:500;">🎂 TUG'ILGAN KUN</label>
+          <input id="regBirth" type="date"
+            style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:#fff;font-size:15px;box-sizing:border-box;outline:none;"
+            onfocus="this.style.borderColor='#7c6af7'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
+        
+        <button onclick="registerUser()" id="regBtn"
+          style="width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,#7c6af7,#9d8ff7);color:white;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:opacity 0.2s;box-shadow:0 8px 24px rgba(124,106,247,0.4);"
+          onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+          Kirish →
+        </button>
+        
+        <div style="text-align:center;margin-top:20px;font-size:12px;color:#555;">
+          🔒 Ma'lumotlaringiz xavfsiz • © Axmadov Azizbek
+        </div>
       </div>
     </div>
   </div>
@@ -577,6 +583,9 @@ tr:hover td { background:rgba(124,106,247,0.04); }
 <script>
 // ===== USER LOGIN =====
 function initLogin() {
+  // Clear old Google login data
+  localStorage.removeItem('sai-user-google');
+  
   const saved = localStorage.getItem('sai-user-info');
   if (saved) {
     const u = JSON.parse(saved);
