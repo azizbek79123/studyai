@@ -806,7 +806,7 @@ Foiz yozma. Faqat aniq, foydali tavsiyalar ber. 300 so'z.`;
     document.getElementById('aiText').textContent = text;
     document.getElementById('aiResult').classList.add('visible');
 
-    const entry = { id:Date.now(), date:new Date().toLocaleDateString('uz-UZ'), goal, result:text, pct, type:'analysis' };
+    const entry = { id:Date.now(), date:new Date().toLocaleDateString('uz-UZ'), goal, result:text, type:'analysis' };
     history.unshift(entry);
     localStorage.setItem('sai-history', JSON.stringify(history));
   } catch(e) {
